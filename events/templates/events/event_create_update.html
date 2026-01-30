@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if form.instance.id %}
+        Edit {{ form.instance.title }} - EventConnect254
+    {% else %}
+        Create New Event - EventConnect254
+    {% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .custom-file-upload {
+        border: 1px dashed #ccc;
+        border-radius: 5px;
+        padding: 20px;
+        text-align: center;
+        cursor: pointer;
+        margin-bottom: 1rem;
+    }
+    
+    .image-preview {
+        max-width: 100%;
+        max-height: 200px;
+        margin-top: 15px;
+        border-radius: 5px;
+    }
+    
+    .required-field::after {
+        content: "*";
+        color: red;
+        margin-left: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white py-3">
+                    <h1 class="h3 mb-0">
+                        {% if form.instance.id %}
+                            Edit Event
+                        {% else %}
+                            Create New Event
+                        {% endif %}
+                    </h1>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if form.non_field_errors %}
+                            <div class="alert alert-danger">
+                                {% for error in form.non_field_errors %}
+                                    {{ error }}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                        
+                        <!-- Event Details Section -->
+                        <h2 class="h5 mb-3">Event Details</h2>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.title.id_for_label }}" class="form-label required-field">Title</label>
+                                {{ form.title }}
+                                {% if form.title.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.title.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">A clear, concise name for your event.</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.category.id_for_label }}" class="form-label required-field">Category</label>
+                                {{ form.category }}
+                                {% if form.category.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.category.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-12">
+                                <label for="{{ form.description.id_for_label }}" class="form-label required-field">Description</label>
+                                {{ form.description }}
+                                {% if form.description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.description.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Provide detailed information about your event.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Location and Date Section -->
+                        <h2 class="h5 mb-3">Location & Date</h2>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.location.id_for_label }}" class="form-label required-field">Location</label>
+                                {{ form.location }}
+                                {% if form.location.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.location.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">City, state, country, etc.</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.venue.id_for_label }}" class="form-label required-field">Venue</label>
+                                {{ form.venue }}
+                                {% if form.venue.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.venue.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">Specific venue name or address.</div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.start_date.id_for_label }}" class="form-label required-field">Start Date & Time</label>
+                                {{ form.start_date }}
+                                {% if form.start_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.start_date.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.end_date.id_for_label }}" class="form-label required-field">End Date & Time</label>
+                                {{ form.end_date }}
+                                {% if form.end_date.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.end_date.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Event Image and Capacity -->
+                        <h2 class="h5 mb-3">Image & Capacity</h2>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.image.id_for_label }}" class="form-label">Event Image</label>
+                                <div class="custom-file-upload" id="file-upload-container">
+                                    <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                    <p class="mb-1">Drag & drop an image or click to browse</p>
+                                    <small class="text-muted">Recommended size: 1200 x 600 pixels</small>
+                                    
+                                    <div class="mt-2">
+                                        {{ form.image }}
+                                        {% if form.image.errors %}
+                                            <div class="invalid-feedback d-block">
+                                                {% for error in form.image.errors %}
+                                                    {{ error }}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    {% if form.instance.image %}
+                                        <div class="mt-3">
+                                            <img src="{{ form.instance.image.url }}" alt="Event image preview" class="image-preview" id="image-preview">
+                                        </div>
+                                    {% else %}
+                                        <div class="mt-3 d-none">
+                                            <img src="" alt="Event image preview" class="image-preview" id="image-preview">
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <label for="{{ form.max_attendees.id_for_label }}" class="form-label required-field">Maximum Attendees</label>
+                                {{ form.max_attendees }}
+                                {% if form.max_attendees.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.max_attendees.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">The maximum number of tickets available for this event.</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Event Status -->
+                        <h2 class="h5 mb-3">Status</h2>
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.status.id_for_label }}" class="form-label required-field">Event Status</label>
+                                {{ form.status }}
+                                {% if form.status.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in form.status.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="form-text">
+                                    <ul class="mb-0 ps-3">
+                                        <li><strong>Draft</strong>: Save the event but don't publish it yet.</li>
+                                        <li><strong>Published</strong>: Make the event visible and allow ticket purchases.</li>
+                                        <li><strong>Cancelled</strong>: Mark the event as cancelled.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Ticket Types Section (Would be added in a more complex implementation) -->
+                        
+                        <hr class="my-4">
+                        
+                        <div class="d-flex gap-2 justify-content-end">
+                            <a href="{% if form.instance.id %}{% url 'event_detail' form.instance.slug %}{% else %}{% url 'event_list' %}{% endif %}" class="btn btn-outline-secondary">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                {% if form.instance.id %}
+                                    Update Event
+                                {% else %}
+                                    Create Event
+                                {% endif %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Form styling
+        const formElements = document.querySelectorAll('input, textarea, select');
+        formElements.forEach(el => {
+            if (el.type !== 'file') {
+                el.classList.add('form-control');
+            } else {
+                el.classList.add('form-control-file', 'd-none');
+            }
+        });
+        
+        // Image preview functionality
+        const imageInput = document.querySelector('input[type="file"]');
+        const imagePreview = document.getElementById('image-preview');
+        const imagePreviewContainer = imagePreview.parentElement;
+        const fileUploadContainer = document.getElementById('file-upload-container');
+        
+        fileUploadContainer.addEventListener('click', function() {
+            imageInput.click();
+        });
+        
+        fileUploadContainer.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            fileUploadContainer.classList.add('border-primary');
+        });
+        
+        fileUploadContainer.addEventListener('dragleave', function() {
+            fileUploadContainer.classList.remove('border-primary');
+        });
+        
+        fileUploadContainer.addEventListener('drop', function(e) {
+            e.preventDefault();
+            fileUploadContainer.classList.remove('border-primary');
+            
+            if (e.dataTransfer.files.length) {
+                imageInput.files = e.dataTransfer.files;
+                showImagePreview(e.dataTransfer.files[0]);
+            }
+        });
+        
+        imageInput.addEventListener('change', function() {
+            if (this.files.length) {
+                showImagePreview(this.files[0]);
+            }
+        });
+        
+        function showImagePreview(file) {
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreviewContainer.classList.remove('d-none');
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // Date time pickers (assuming Bootstrap 5 compatible datetime-local inputs)
+        const dateInputs = document.querySelectorAll('input[type="datetime-local"]');
+        dateInputs.forEach(input => {
+            // Format datetime value if coming from the database
+            if (input.value && !input.value.includes('T')) {
+                const date = new Date(input.value);
+                const formattedDate = date.toISOString().slice(0, 16);
+                input.value = formattedDate;
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

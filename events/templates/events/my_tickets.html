@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block title %}My Tickets - EventConnect254{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold mb-0">My Tickets</h1>
+    </div>
+    
+    {% if orders %}
+        <div class="row g-4">
+            {% for order in orders %}
+                {% for item in order.items.all %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card shadow-sm h-100">
+                            <div class="position-relative">
+                                {% if item.event.image %}
+                                    <img src="{{ item.event.image.url }}" class="card-img-top event-image" alt="{{ item.event.title }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/300x150?text=No+Image" class="card-img-top event-image" alt="No image">
+                                {% endif %}
+                                
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <span class="badge bg-primary">{{ item.ticket.get_ticket_type_display }}</span>
+                                </div>
+                                
+                                {% if item.event.is_past %}
+                                    <div class="position-absolute bottom-0 start-0 w-100 text-center py-2" style="background-color: rgba(0,0,0,0.7);">
+                                        <span class="badge bg-secondary">Event Ended</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ item.event.title }}</h5>
+                                
+                                <div class="mb-3">
+                                    <p class="card-text mb-1">
+                                        <i class="fas fa-calendar-alt text-muted me-2"></i>
+                                        {{ item.event.start_date|date:"F d, Y" }}
+                                    </p>
+                                    <p class="card-text mb-1">
+                                        <i class="fas fa-clock text-muted me-2"></i>
+                                        {{ item.event.start_date|date:"g:i A" }}
+                                    </p>
+                                    <p class="card-text mb-0">
+                                        <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                        {{ item.event.location }}
+                                    </p>
+                                </div>
+                                
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="text-muted">
+                                            <strong>Qty:</strong> {{ item.quantity }}
+                                        </span>
+                                        
+                                        <a href="{% url 'event_detail' item.event.slug %}" class="btn btn-sm btn-primary">
+                                            <i class="fas fa-info-circle me-1"></i> View Event
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="card-footer bg-light">
+                                <small class="text-muted">
+                                    Order #{{ order.id }} | {{ order.created|date:"M d, Y" }}
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <i class="fas fa-ticket-alt fa-3x text-muted mb-3"></i>
+                <h3 class="h4 mb-3">No Tickets Yet</h3>
+                <p class="mb-4">You haven't purchased any tickets yet. Start exploring events to find something interesting!</p>
+                <a href="{% url 'event_list' %}" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i> Browse Events
+                </a>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

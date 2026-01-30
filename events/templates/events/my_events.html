@@ -1,0 +1,317 @@
+{% extends 'base.html' %}
+
+{% block title %}My Events - EventConnect254{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold mb-0">My Events</h1>
+        <a href="{% url 'create_event' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i> Create New Event
+        </a>
+    </div>
+    
+    <!-- Events Tabs -->
+    <ul class="nav nav-tabs mb-4" id="eventsTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming-events" type="button" role="tab">
+                Upcoming Events
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="past-tab" data-bs-toggle="tab" data-bs-target="#past-events" type="button" role="tab">
+                Past Events
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="draft-tab" data-bs-toggle="tab" data-bs-target="#draft-events" type="button" role="tab">
+                Draft Events
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled-events" type="button" role="tab">
+                Cancelled Events
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="eventsTabContent">
+        <!-- Upcoming Events Tab -->
+        <div class="tab-pane fade show active" id="upcoming-events" role="tabpanel" aria-labelledby="upcoming-tab">
+            <div class="row g-4">
+                {% for event in events %}
+                    {% if not event.is_past and event.status == 'published' %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card shadow-sm h-100">
+                                {% if event.image %}
+                                    <img src="{{ event.image.url }}" class="card-img-top event-image" alt="{{ event.title }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/300x150?text=No+Image" class="card-img-top event-image" alt="No image">
+                                {% endif %}
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="category-badge {% if event.category.slug %}category-{{ event.category.slug }}{% endif %}">
+                                            {{ event.category.name }}
+                                        </span>
+                                        <span class="badge bg-success">{{ event.status }}</span>
+                                    </div>
+                                    
+                                    <h5 class="card-title">{{ event.title }}</h5>
+                                    
+                                    <div class="mb-3">
+                                        <p class="card-text mb-1">
+                                            <i class="fas fa-calendar-alt text-muted me-2"></i>
+                                            {{ event.start_date|date:"F d, Y" }}
+                                        </p>
+                                        <p class="card-text mb-0">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            {{ event.location }}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="progress mb-2" style="height: 5px;">
+                                            <div class="progress-bar bg-success" role="progressbar" 
+                                                 style="width: {{ event.tickets_sold|div:event.max_attendees|mult:100 }}%">
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                {{ event.tickets_sold }} / {{ event.max_attendees }} tickets sold
+                                            </small>
+                                            
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="eventActions{{ event.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="eventActions{{ event.id }}">
+                                                    <li><a class="dropdown-item" href="{% url 'event_detail' event.slug %}">View Event</a></li>
+                                                    <li><a class="dropdown-item" href="{% url 'update_event' event.slug %}">Edit Event</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="{% url 'delete_event' event.slug %}">Cancel Event</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-calendar-day fa-3x text-muted mb-3"></i>
+                                <h3 class="h4 mb-3">No Upcoming Events</h3>
+                                <p class="mb-4">You don't have any upcoming events at the moment.</p>
+                                <a href="{% url 'create_event' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i> Create an Event
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Past Events Tab -->
+        <div class="tab-pane fade" id="past-events" role="tabpanel" aria-labelledby="past-tab">
+            <div class="row g-4">
+                {% for event in events %}
+                    {% if event.is_past and event.status == 'published' %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card shadow-sm h-100">
+                                {% if event.image %}
+                                    <img src="{{ event.image.url }}" class="card-img-top event-image" alt="{{ event.title }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/300x150?text=No+Image" class="card-img-top event-image" alt="No image">
+                                {% endif %}
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="category-badge {% if event.category.slug %}category-{{ event.category.slug }}{% endif %}">
+                                            {{ event.category.name }}
+                                        </span>
+                                        <span class="badge bg-secondary">Past</span>
+                                    </div>
+                                    
+                                    <h5 class="card-title">{{ event.title }}</h5>
+                                    
+                                    <div class="mb-3">
+                                        <p class="card-text mb-1">
+                                            <i class="fas fa-calendar-alt text-muted me-2"></i>
+                                            {{ event.start_date|date:"F d, Y" }}
+                                        </p>
+                                        <p class="card-text mb-0">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            {{ event.location }}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                {{ event.tickets_sold }} tickets sold
+                                            </small>
+                                            
+                                            <a href="{% url 'event_detail' event.slug %}" class="btn btn-sm btn-outline-secondary">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-history fa-3x text-muted mb-3"></i>
+                                <h3 class="h4 mb-3">No Past Events</h3>
+                                <p class="mb-4">You don't have any past events at the moment.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Draft Events Tab -->
+        <div class="tab-pane fade" id="draft-events" role="tabpanel" aria-labelledby="draft-tab">
+            <div class="row g-4">
+                {% for event in events %}
+                    {% if event.status == 'draft' %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card shadow-sm h-100">
+                                {% if event.image %}
+                                    <img src="{{ event.image.url }}" class="card-img-top event-image" alt="{{ event.title }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/300x150?text=No+Image" class="card-img-top event-image" alt="No image">
+                                {% endif %}
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="category-badge {% if event.category.slug %}category-{{ event.category.slug }}{% endif %}">
+                                            {{ event.category.name }}
+                                        </span>
+                                        <span class="badge bg-warning text-dark">{{ event.status }}</span>
+                                    </div>
+                                    
+                                    <h5 class="card-title">{{ event.title }}</h5>
+                                    
+                                    <div class="mb-3">
+                                        <p class="card-text mb-1">
+                                            <i class="fas fa-calendar-alt text-muted me-2"></i>
+                                            {{ event.start_date|date:"F d, Y" }}
+                                        </p>
+                                        <p class="card-text mb-0">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            {{ event.location }}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                Created: {{ event.created|date:"M d, Y" }}
+                                            </small>
+                                            
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="draftActions{{ event.id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="draftActions{{ event.id }}">
+                                                    <li><a class="dropdown-item" href="{% url 'update_event' event.slug %}">Edit Event</a></li>
+                                                    <li><a class="dropdown-item text-danger" href="{% url 'delete_event' event.slug %}">Delete Draft</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-file-alt fa-3x text-muted mb-3"></i>
+                                <h3 class="h4 mb-3">No Draft Events</h3>
+                                <p class="mb-4">You don't have any draft events at the moment.</p>
+                                <a href="{% url 'create_event' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i> Create an Event
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Cancelled Events Tab -->
+        <div class="tab-pane fade" id="cancelled-events" role="tabpanel" aria-labelledby="cancelled-tab">
+            <div class="row g-4">
+                {% for event in events %}
+                    {% if event.status == 'cancelled' %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card shadow-sm h-100">
+                                {% if event.image %}
+                                    <img src="{{ event.image.url }}" class="card-img-top event-image" alt="{{ event.title }}">
+                                {% else %}
+                                    <img src="https://via.placeholder.com/300x150?text=No+Image" class="card-img-top event-image" alt="No image">
+                                {% endif %}
+                                
+                                <div class="card-body d-flex flex-column">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="category-badge {% if event.category.slug %}category-{{ event.category.slug }}{% endif %}">
+                                            {{ event.category.name }}
+                                        </span>
+                                        <span class="badge bg-danger">{{ event.status }}</span>
+                                    </div>
+                                    
+                                    <h5 class="card-title">{{ event.title }}</h5>
+                                    
+                                    <div class="mb-3">
+                                        <p class="card-text mb-1">
+                                            <i class="fas fa-calendar-alt text-muted me-2"></i>
+                                            {{ event.start_date|date:"F d, Y" }}
+                                        </p>
+                                        <p class="card-text mb-0">
+                                            <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                                            {{ event.location }}
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">
+                                                Cancelled: {{ event.updated|date:"M d, Y" }}
+                                            </small>
+                                            
+                                            <a href="{% url 'event_detail' event.slug %}" class="btn btn-sm btn-outline-secondary">
+                                                View Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% empty %}
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center py-5">
+                                <i class="fas fa-ban fa-3x text-muted mb-3"></i>
+                                <h3 class="h4 mb-3">No Cancelled Events</h3>
+                                <p class="mb-4">You don't have any cancelled events at the moment.</p>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
